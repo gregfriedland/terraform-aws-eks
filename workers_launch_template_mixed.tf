@@ -316,6 +316,20 @@ resource "aws_launch_template" "workers_launch_template_mixed" {
     }
   }
 
+  dynamic block_device_mappings {
+   iterator = item
+   for_each = lookup(var.worker_groups_launch_template[count.index], "additional_volumes", [])
+   content {
+     device_name = item.value.device_name
+     ebs {
+       iops        = lookup(item.value, "ebs_iops", null)
+       snapshot_id = lookup(item.value, "ebs_snapshot_id", null)
+       volume_size = lookup(item.value, "ebs_volume_size", null)
+       volume_type = lookup(item.value, "ebs_volume_type", null)
+     }
+   }
+  }
+
   tag_specifications {
     resource_type = "volume"
 
